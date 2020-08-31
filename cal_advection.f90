@@ -1,10 +1,10 @@
 module advection_test
     implicit none
     double precision, parameter :: pi = acos(-1.0d0)
-    integer, parameter :: NXmin = -80, NXmax = 80     !x方向の計算領域の形状
-    integer, parameter :: NYmin = -80, NYmax = 80     !y方向の計算領域の形状
-    integer, parameter :: NZmin = -80, NZmax = 80     !z方向の計算領域の形状
-    double precision, parameter :: Xmax = 0.5d0*pi, Ymax = 0.5d0*pi, Zmax = 0.5d0*pi  !各方向の計算領域の最大値
+    integer, parameter :: NXmin = 1, NXmax = 160     !x方向の計算領域の形状
+    integer, parameter :: NYmin = 1, NYmax = 160     !y方向の計算領域の形状
+    integer, parameter :: NZmin = 1, NZmax = 160     !z方向の計算領域の形状
+    double precision, parameter :: Xmax = 2.0d0*pi, Ymax = 2.0d0*pi, Zmax = 2.0d0*pi  !各方向の計算領域の最大値
     double precision, save :: dX, dY, dZ            !各方向の刻み幅
     double precision, save :: ddX, ddY, ddZ    !各方向の刻み幅の逆数
     double precision, save :: ddX2, ddY2, ddZ2 !各方向の刻み幅の逆数の二乗
@@ -58,9 +58,9 @@ end subroutine set_grid
         do iZ = NZmin-1, NZmax
             do iY = NYmin-1, NYmax
                 do iX = NXmin-1, NXmax
-                    Vx(iX,iY,iZ) = sin((X(iX,iY,iZ) + 0.5d0*dX) + (Y(iX,iY,iZ) + 0.5d0*dY) + (Z(iX,iY,iZ) + 0.5d0*dZ))
-                    Vy(iX,iY,iZ) = cos((X(iX,iY,iZ) + 0.5d0*dX) + (Y(iX,iY,iZ) + 0.5d0*dY) + (Z(iX,iY,iZ) + 0.5d0*dZ))
-                    Vz(iX,iY,iZ) = sin(2.0d0*((X(iX,iY,iZ) + 0.5d0*dX) + (Y(iX,iY,iZ) + 0.5d0*dY) + (Z(iX,iY,iZ) + 0.5d0*dZ)))
+                    Vx(iX,iY,iZ) = sin((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ))
+                    Vy(iX,iY,iZ) = cos(X(iX,iY,iZ) + (Y(iX,iY,iZ) + 0.5d0*dY) + Z(iX,iY,iZ))
+                    Vz(iX,iY,iZ) = sin(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ)))
                 enddo
             enddo
         enddo
@@ -160,32 +160,32 @@ end subroutine set_grid
         do iZ = NZmin, NZmax-1
             do iY = NYmin, NYmax-1
                 do iX = NXmin, NXmax-1
-                    Ax_th(iX,iY,iZ) = -(2.0d0*sin(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
-                                    *cos(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
-                                    + (cos(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)))**2 &
-                                    - (sin(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)))**2 &
-                                    + cos(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
-                                    *sin(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ))) &
-                                    + 2.0d0*sin(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
-                                    *cos(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ))))
-                    Ay_th(iX,iY,iZ) = -((cos(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)))**2 &
-                                    - (sin(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)))**2 &
-                                    - 2.0d0*cos(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
-                                    *sin(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
-                                    - sin(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
-                                    *sin(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ))) &
-                                    + 2.0d0*cos(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
-                                    *cos(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ))))
-                    Az_th(iX,iY,iZ) = -(cos(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
-                                    *sin(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ))) &
-                                    + 2.0d0*sin(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
-                                    *cos(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ))) &
-                                    - sin(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
-                                    *sin(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ))) &
-                                    + 2.0d0*cos(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
-                                    *cos(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ))) &
-                                    + 4.0d0*sin(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ))) &
-                                    *cos(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ))))
+                    Ax_th(iX,iY,iZ) = -(2.0d0*sin((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
+                                    *cos((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
+                                    + (cos((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ)))**2 &
+                                    - (sin((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ)))**2 &
+                                    + cos((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
+                                    *sin(2.0d0*((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ))) &
+                                    + 2.0d0*sin((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ)) &
+                                    *cos(2.0d0*((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ))))
+                    Ay_th(iX,iY,iZ) = -((cos(X(iX,iY,iZ) + (Y(iX,iY,iZ) + 0.5d0*dY) + Z(iX,iY,iZ)))**2 &
+                                    - (sin(X(iX,iY,iZ) + (Y(iX,iY,iZ) + 0.5d0*dY) + Z(iX,iY,iZ)))**2 &
+                                    - 2.0d0*cos(X(iX,iY,iZ) + (Y(iX,iY,iZ) + 0.5d0*dY) + Z(iX,iY,iZ)) &
+                                    *sin(X(iX,iY,iZ) + (Y(iX,iY,iZ) + 0.5d0*dY) + Z(iX,iY,iZ)) &
+                                    - sin(X(iX,iY,iZ) + (Y(iX,iY,iZ) + 0.5d0*dY) + Z(iX,iY,iZ)) &
+                                    *sin(2.0d0*(X(iX,iY,iZ) + (Y(iX,iY,iZ) + 0.5d0*dY) + Z(iX,iY,iZ))) &
+                                    + 2.0d0*cos(X(iX,iY,iZ) + (Y(iX,iY,iZ) + 0.5d0*dY) + Z(iX,iY,iZ)) &
+                                    *cos(2.0d0*(X(iX,iY,iZ) + (Y(iX,iY,iZ) + 0.5d0*dY) + Z(iX,iY,iZ))))
+                    Az_th(iX,iY,iZ) = -(cos(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ)) &
+                                    *sin(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ))) &
+                                    + 2.0d0*sin(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ)) &
+                                    *cos(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ))) &
+                                    - sin(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ)) &
+                                    *sin(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ))) &
+                                    + 2.0d0*cos(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ)) &
+                                    *cos(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ))) &
+                                    + 4.0d0*sin(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ))) &
+                                    *cos(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ))))
                 enddo
             enddo
         enddo
@@ -223,9 +223,9 @@ end subroutine set_grid
                 enddo
             enddo
         enddo
-        errorx = errorx / (NX*NY*NZ)
-        errory = errory / (NX*NY*NZ)
-        errorz = errorz / (NX*NY*NZ)
+        errorx = sqrt(errorx / (NX*NY*NZ))
+        errory = sqrt(errory / (NX*NY*NZ))
+        errorz = sqrt(errorz / (NX*NY*NZ))
     end subroutine cal_error
 end module advection_test
 

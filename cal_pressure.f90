@@ -1,10 +1,10 @@
 module p_error
     implicit none
     double precision, parameter :: pi = acos(-1.0d0)
-    integer, parameter :: NXmin = -20, NXmax = 20     !x方向の計算領域の形状
-    integer, parameter :: NYmin = -20, NYmax = 20     !y方向の計算領域の形状
-    integer, parameter :: NZmin = -20, NZmax = 20     !z方向の計算領域の形状
-    double precision, parameter :: Xmax = 0.5d0*pi, Ymax = 0.5d0*pi, Zmax = 0.5d0*pi  !各方向の計算領域の最大値
+    integer, parameter :: NXmin = 1, NXmax = 160     !x方向の計算領域の形状
+    integer, parameter :: NYmin = 1, NYmax = 160     !y方向の計算領域の形状
+    integer, parameter :: NZmin = 1, NZmax = 160     !z方向の計算領域の形状
+    double precision, parameter :: Xmax = 2.0d0*pi, Ymax = 2.0d0*pi, Zmax = 2.0d0*pi  !各方向の計算領域の最大値
     double precision, parameter :: dt = 1.0d-2      !時間刻み幅
     double precision, parameter :: Re = 10d0        !レイノルズ数
     integer, save :: Ng                             !格子点数
@@ -60,7 +60,7 @@ subroutine set_pressure(p, X, Y, Z)
     do iZ = NZmin-1, NZmax+1
         do iY = NYmin-1, NZmax+1
             do iX = NXmin-1, NZmax+1
-                p(iX,iY,iZ) = cos(2.0d0*(X(iX,iY,iZ)+Y(iX,iY,iZ)+Z(iX,iY,iZ)))
+                p(iX,iY,iZ) = cos(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + Z(iX,iY,iZ)))
             enddo
         enddo
     enddo
@@ -75,7 +75,7 @@ subroutine dif_pressure_x(p, dpx)
     do iZ = NZmin-1, NZmax
         do iY = NYmin-1, NYmax
             do iX = NXmin-1, NXmax
-                dpx(iX, iY, iZ) = ddX*(-p(iX, iY, iZ)+p(iX+1, iY, iZ))
+                dpx(iX, iY, iZ) = ddX*(-p(iX, iY, iZ) + p(iX+1, iY, iZ))
             enddo
         enddo
     enddo
@@ -90,7 +90,7 @@ subroutine dif_pressure_y(p, dpy)
     do iZ = NZmin-1, NZmax
         do iY = NYmin-1, NYmax
             do iX = NXmin-1, NXmax
-                dpy(iX, iY, iZ) = ddY*(-p(iX, iY, iZ)+p(iX, iY+1, iZ))
+                dpy(iX, iY, iZ) = ddY*(-p(iX, iY, iZ) + p(iX, iY+1, iZ))
             enddo
         enddo
     enddo
@@ -105,80 +105,60 @@ subroutine dif_pressure_z(p, dpz)
     do iZ = NZmin-1, NZmax
         do iY = NYmin-1, NYmax
             do iX = NXmin-1, NXmax
-                dpz(iX, iY, iZ) = ddZ*(-p(iX, iY, iZ)+p(iX, iY, iZ+1))
+                dpz(iX, iY, iZ) = ddZ*(-p(iX, iY, iZ) + p(iX, iY, iZ+1))
             enddo
         enddo
     enddo
 end subroutine dif_pressure_z
-!***************************************************
-!   圧力項のx微分の解析解を計算するサブルーチン    *
-!***************************************************
-    subroutine th_pressure_x(X, Y, Z, dpx_th)
+!********************************************
+!   圧力項の解析解を計算するサブルーチン    *
+!********************************************
+    subroutine th_pressure(X, Y, Z, dpx_th, dpy_th, dpz_th)
         double precision, intent(in) :: X(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(in) :: Y(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(in) :: Z(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(out) :: dpx_th(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
-        integer iX, iY, iZ
-        do iZ = NZmin-1, NZmax
-            do iY = NYmin-1, NYmax
-                do iX = NXmin-1, NXmax
-                    dpx_th = -2.0d0*sin(2.0d0*((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ)))
-                enddo
-            enddo
-        enddo
-    end subroutine th_pressure_x
-!***************************************************
-!   圧力項のx微分の解析解を計算するサブルーチン    *
-!***************************************************
-    subroutine th_pressure_y(X, Y, Z, dpy_th)
-        double precision, intent(in) :: X(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-        double precision, intent(in) :: Y(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-        double precision, intent(in) :: Z(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(out) :: dpy_th(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
-        integer iX, iY, iZ
-        do iZ = NZmin-1, NZmax
-            do iY = NYmin-1, NYmax
-                do iX = NXmin-1, NXmax
-                    dpy_th = -2.0d0*sin(2.0d0*(X(iX,iY,iZ) + (Y(iX,iY,iZ) + 0.5d0*dY) + Z(iX,iY,iZ)))
-                enddo
-            enddo
-        enddo
-    end subroutine th_pressure_y
-!***************************************************
-!   圧力項のz微分の解析解を計算するサブルーチン    *
-!***************************************************
-    subroutine th_pressure_z(X, Y, Z, dpz_th)
-        double precision, intent(in) :: X(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-        double precision, intent(in) :: Y(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-        double precision, intent(in) :: Z(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(out) :: dpz_th(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
         integer iX, iY, iZ
         do iZ = NZmin-1, NZmax
             do iY = NYmin-1, NYmax
                 do iX = NXmin-1, NXmax
-                    dpz_th = -2.0d0*sin(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ)))
+                    dpx_th(iX, iY, iZ) = -2.0d0*sin(2.0d0*((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ)))
+                    dpy_th(iX, iY, iZ) = -2.0d0*sin(2.0d0*(X(iX,iY,iZ) + (Y(iX,iY,iZ) + 0.5d0*dY) + Z(iX,iY,iZ)))
+                    dpz_th(iX, iY, iZ) = -2.0d0*sin(2.0d0*(X(iX,iY,iZ) + Y(iX,iY,iZ) + (Z(iX,iY,iZ) + 0.5d0*dZ)))
                 enddo
             enddo
         enddo
-    end subroutine th_pressure_z
+    end subroutine th_pressure
 !********************************
 !   誤差を計算するサブルーチン  *
 !********************************
-    subroutine cal_error(dp, dp_th, error)
-        double precision, intent(in) :: dp(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
-        double precision, intent(in) :: dp_th(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
-        double precision, intent(out) :: error
+    subroutine cal_error(dpx, dpy, dpz, dpx_th, dpy_th, dpz_th, errorx, errory, errorz)
+        double precision, intent(in) :: dpx(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
+        double precision, intent(in) :: dpy(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
+        double precision, intent(in) :: dpz(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
+        double precision, intent(in) :: dpx_th(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
+        double precision, intent(in) :: dpy_th(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
+        double precision, intent(in) :: dpz_th(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
+        double precision, intent(out) :: errorx, errory, errorz
         integer iX, iY, iZ
-        double precision error_norm
-        error_norm = 0.0d0
+        double precision errorx_norm, errory_norm, errorz_norm
+        errorx_norm = 0.0d0
+        errory_norm = 0.0d0
+        errorz_norm = 0.0d0
         do iZ = NZmin-1, NZmax
             do iY = NYmin-1, NYmax
                 do iX = NXmin-1, NXmax
-                    error_norm = error_norm + (dp(iX,iY,iZ) - dp_th(iX,iY,iZ))**2
+                    errorx_norm = errorx_norm + (dpx(iX,iY,iZ) - dpx_th(iX,iY,iZ))**2
+                    errory_norm = errory_norm + (dpy(iX,iY,iZ) - dpy_th(iX,iY,iZ))**2
+                    errorz_norm = errorz_norm + (dpz(iX,iY,iZ) - dpz_th(iX,iY,iZ))**2
                 enddo
             enddo
         enddo
-        error = sqrt(error_norm / Ng)
+        errorx = sqrt(errorx_norm / Ng)
+        errory = sqrt(errory_norm / Ng)
+        errorz = sqrt(errorz_norm / Ng)
     end subroutine cal_error
 end module p_error
 
@@ -201,12 +181,8 @@ program main
     call dif_pressure_x(p, dpx)
     call dif_pressure_y(p, dpy)
     call dif_pressure_z(p, dpz)
-    call th_pressure_x(X, Y, Z, dpx_th)
-    call th_pressure_y(X, Y, Z, dpy_th)
-    call th_pressure_z(X, Y, Z, dpz_th)
-    call cal_error(dpx, dpx_th, errorx)
-    call cal_error(dpy, dpy_th, errory)
-    call cal_error(dpz, dpz_th, errorz)
+    call th_pressure(X, Y, Z, dpx_th, dpy_th, dpz_th)
+    call cal_error(dpx, dpy, dpz, dpx_th, dpy_th, dpz_th, errorx, errory, errorz)
     open(11, file = 'chk_pressure_precision.dat', position = 'append')
     write(11, *) dX, dY, dZ, errorx, errory, errorz
     close(11)
