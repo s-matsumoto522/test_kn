@@ -1,4 +1,4 @@
-module x_RHSx
+module z_RHSz
     implicit none
     double precision, parameter :: pi = acos(-1.0d0)
     integer, parameter :: NXmin = 1, NXmax = 160     !x方向の計算領域の形状
@@ -267,57 +267,57 @@ end subroutine set_velocity
         enddo
     end subroutine dif_pressure_z
 !***************************************************************
-!   KN法において連立方程式の右辺(x成分)を計算するサブルーチン  *
+!   KN法において連立方程式の右辺(y成分)を計算するサブルーチン  *
 !***************************************************************
-    subroutine cal_RHSx(Vx, Vy, Vz, p, Ax2, istep, RHSx)
+    subroutine cal_RHSz(Vx, Vy, Vz, p, Az2, istep, RHSz)
         integer, intent(in) :: istep
         double precision, intent(in) :: Vx(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
         double precision, intent(in) :: Vy(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
         double precision, intent(in) :: Vz(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
         double precision, intent(in) :: p(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-        double precision, intent(inout) :: Ax2(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
-        double precision, intent(out) :: RHSx(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
-        double precision Ax1(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
-        double precision Bx(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
-        double precision dpx(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
+        double precision, intent(inout) :: Az2(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+        double precision, intent(out) :: RHSz(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+        double precision Az1(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+        double precision Bz(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+        double precision dpz(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
         double precision C
         integer iX, iY, iZ
         !---計算用数値の計算---
         C = 0.5d0*dt/Re
         if(istep == 1) then
-            call cal_x_advection(Vx, Vy, Vz, Ax2)
-            call cal_x_viscosity(Vx, Bx)
-            call dif_pressure_x(p, dpx)
+            call cal_x_advection(Vx, Vy, Vz, Az2)
+            call cal_x_viscosity(Vx, Bz)
+            call dif_pressure_x(p, dpz)
             do iZ = NZmin, NZmax-1
                 do iY = NYmin, NYmax-1
                     do iX = NXmin, NXmax-1
-                        RHSx(iX,iY,iZ) = Vx(iX,iY,iZ)+C*Bx(iX,iY,iZ)-dt*dpx(iX,iY,iZ)+dt*Ax2(iX,iY,iZ)
+                        RHSz(iX,iY,iZ) = Vx(iX,iY,iZ)+C*Bz(iX,iY,iZ)-dt*dpz(iX,iY,iZ)+dt*Az2(iX,iY,iZ)
                     enddo
                 enddo
             enddo
         else
-            Ax1(:, :, :) = Ax2(:, :, :)
-            call cal_x_advection(Vx, Vy, Vz, Ax2)
-            call cal_x_viscosity(Vx, Bx)
-            call dif_pressure_x(p, dpx)
+            Az1(:, :, :) = Az2(:, :, :)
+            call cal_x_advection(Vx, Vy, Vz, Az2)
+            call cal_x_viscosity(Vx, Bz)
+            call dif_pressure_x(p, dpz)
             do iZ = NZmin, NZmax-1
                 do iY = NYmin, NYmax-1
                     do iX = NXmin, NXmax-1
-                        RHSx(iX,iY,iZ) = Vx(iX,iY,iZ)+C*Bx(iX,iY,iZ)-dt*dpx(iX,iY,iZ) &
-                                        +0.5d0*dt*(3.0d0*Ax2(iX,iY,iZ)-Ax1(iX,iY,iZ))
+                        RHSz(iX,iY,iZ) = Vx(iX,iY,iZ)+C*Bz(iX,iY,iZ)-dt*dpz(iX,iY,iZ) &
+                                        +0.5d0*dt*(3.0d0*Az2(iX,iY,iZ)-Az1(iX,iY,iZ))
                     enddo
                 enddo
             enddo
         endif
-    end subroutine cal_RHSx
+    end subroutine cal_RHSz
 !****************************************
 !   右辺の解析解を計算するサブルーチン  *
 !****************************************
-    subroutine cal_RHSx_th(X, Y, Z, RHSx_th)
+    subroutine cal_RHSz_th(X, Y, Z, RHSz_th)
         double precision, intent(in) :: X(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(in) :: Y(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(in) :: Z(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-        double precision, intent(out) :: RHSx_th(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+        double precision, intent(out) :: RHSz_th(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
         integer iX, iY, iZ
         double precision C
         !---計算用数値の計算---
@@ -325,23 +325,23 @@ end subroutine set_velocity
         do iZ = NZmin, NZmax-1
             do iY = NYmin, NYmax-1
                 do iX = NXmin, NXmax-1
-                    RHSx_th(iX,iY,iZ) = sin((X(iX,iY,iZ)+0.5d0*dX)+Y(iX,iY,iZ)+Z(iX,iY,iZ)) &
-                            -3.0d0*C*sin((X(iX,iY,iZ)+0.5d0*dX)+Y(iX,iY,iZ) &
-                            +Z(iX,iY,iZ))+2.0d0*dt*sin(2.0d0*((X(iX,iY,iZ)+0.5d0*dX)+Y(iX,iY,iZ)+Z(iX,iY,iZ))) &
-                            +dt*(-2.0d0*(sin((X(iX,iY,iZ)+0.5d0*dX)+Y(iX,iY,iZ)+Z(iX,iY,iZ))*cos((X(iX,iY,iZ)+0.5d0*dX) &
-                            +Y(iX,iY,iZ)+Z(iX,iY,iZ)))-(cos((X(iX,iY,iZ)+0.5d0*dX)+Y(iX,iY,iZ) &
-                            +Z(iX,iY,iZ)))**2+(sin((X(iX,iY,iZ)+0.5d0*dX)+Y(iX,iY,iZ)+Z(iX,iY,iZ)))**2 &
-                            -cos((X(iX,iY,iZ)+0.5d0*dX)+Y(iX,iY,iZ)+Z(iX,iY,iZ))*sin(2.0d0*((X(iX,iY,iZ)+0.5d0*dX) &
-                            +Y(iX,iY,iZ)+Z(iX,iY,iZ)))-2.0d0*sin((X(iX,iY,iZ)+0.5d0*dX)+Y(iX,iY,iZ) &
-                            +Z(iX,iY,iZ))*cos(2.0d0*((X(iX,iY,iZ)+0.5d0*dX)+Y(iX,iY,iZ)+Z(iX,iY,iZ))))
+                    RHSz_th(iX,iY,iZ) = sin(X(iX,iY,iZ)+Y(iX,iY,iZ)+(Z(iX,iY,iZ)+0.5d0*dZ)) &
+                            -3.0d0*C*sin(X(iX,iY,iZ)+Y(iX,iY,iZ) &
+                            +(Z(iX,iY,iZ)+0.5d0*dZ))+2.0d0*dt*sin(2.0d0*(X(iX,iY,iZ)+Y(iX,iY,iZ)+(Z(iX,iY,iZ)+0.5d0*dZ))) &
+                            +dt*(-2.0d0*(sin(X(iX,iY,iZ)+Y(iX,iY,iZ)+(Z(iX,iY,iZ)+0.5d0*dZ))*cos(X(iX,iY,iZ) &
+                            +Y(iX,iY,iZ)+(Z(iX,iY,iZ)+0.5d0*dZ)))-(cos(X(iX,iY,iZ)+Y(iX,iY,iZ) &
+                            +(Z(iX,iY,iZ)+0.5d0*dZ)))**2+(sin(X(iX,iY,iZ)+Y(iX,iY,iZ)+(Z(iX,iY,iZ)+0.5d0*dZ)))**2 &
+                            -cos(X(iX,iY,iZ)+Y(iX,iY,iZ)+(Z(iX,iY,iZ)+0.5d0*dZ))*sin(2.0d0*(X(iX,iY,iZ) &
+                            +Y(iX,iY,iZ)+(Z(iX,iY,iZ)+0.5d0*dZ)))-2.0d0*sin(X(iX,iY,iZ)+Y(iX,iY,iZ) &
+                            +(Z(iX,iY,iZ)+0.5d0*dZ))*cos(2.0d0*(X(iX,iY,iZ)+Y(iX,iY,iZ)+(Z(iX,iY,iZ)+0.5d0*dZ))))
                 enddo
             enddo
         enddo
-    end subroutine cal_RHSx_th
-end module x_RHSx
+    end subroutine cal_RHSz_th
+end module z_RHSz
 
 program main
-    use x_RHSx
+    use z_RHSz
     implicit none
     double precision X(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
     double precision Y(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
@@ -350,25 +350,25 @@ program main
     double precision Vx(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
     double precision Vy(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
     double precision Vz(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
-    double precision Ax2(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
-    double precision RHSx(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
-    double precision RHSx_th(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+    double precision Az2(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+    double precision RHSz(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+    double precision RHSz_th(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
     double precision error, error_norm
     integer iX, iY, iZ
     call set_grid(X, Y, Z)
     call set_velocity(Vx, Vy, Vz, X, Y, Z)
     call set_pressure(p, X, Y, Z)
-    call cal_RHSx(Vx, Vy, Vz, p, Ax2, 1, RHSx)
-    call cal_RHSx_th(X, Y, Z, RHSx_th)
+    call cal_RHSz(Vx, Vy, Vz, p, Az2, 1, RHSz)
+    call cal_RHSz_th(X, Y, Z, RHSz_th)
     error_norm = 0.0d0
     do iZ = NZmin, NZmax-1
         do iY = NYmin, NYmax-1
             do iX = NXmin, NXmax-1
-                error_norm = error_norm + (RHSx(iX,iY,iZ) - RHSx_th(iX,iY,iZ))**2
+                error_norm = error_norm + (RHSz(iX,iY,iZ) - RHSz_th(iX,iY,iZ))**2
             enddo
         enddo
     enddo
     error = sqrt(error_norm / dble(Ng))
-    open(11, file = 'chk_RHSx_precision.dat', position = 'append')
-    write(11, *) dX, error
+    open(11, file = 'chk_RHSz_precision.dat', position = 'append')
+    write(11, *) dY, error
 end program main
