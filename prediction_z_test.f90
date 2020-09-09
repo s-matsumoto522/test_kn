@@ -1,4 +1,4 @@
-module prediction_x_test
+module prediction_z_test
     implicit none
     double precision, parameter :: pi = acos(-1.0d0)
     integer, parameter :: NXmin = 1, NXmax = 160     !x方向の計算領域の形状
@@ -49,36 +49,36 @@ contains
         enddo
     end subroutine set_grid
 !*******************************************************
-!   予測速度のx成分の境界条件を設定するサブルーチン    *
+!   予測速度のz成分の境界条件を設定するサブルーチン    *
 !*******************************************************
-    subroutine set_xpvel_bc(Vx_p, X, Y, Z)
+    subroutine set_zpvel_bc(Vz_p, X, Y, Z)
         double precision, intent(in) :: X(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(in) :: Y(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(in) :: Z(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-        double precision, intent(out) :: Vx_p(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
-        Vx_p(NXmin-1, NYmin:NYmax-1, NZmin:NZmax-1) = sin((X(NXmin-1, NYmin:NYmax-1, NZmin:NZmax-1) + 0.5d0*dX) &
+        double precision, intent(out) :: Vz_p(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
+        Vz_p(NXmin-1, NYmin:NYmax-1, NZmin:NZmax-1) = sin((X(NXmin-1, NYmin:NYmax-1, NZmin:NZmax-1) + 0.5d0*dX) &
                                                         + Y(NXmin-1, NYmin:NYmax-1, NZmin:NZmax-1) &
                                                         + Z(NXmin-1, NYmin:NYmax-1, NZmin:NZmax-1))
-        Vx_p(NXmax, NYmin:NYmax-1, NZmin:NZmax-1) = sin((X(NXmax, NYmin:NYmax-1, NZmin:NZmax-1) + 0.5d0*dX) &
+        Vz_p(NXmax, NYmin:NYmax-1, NZmin:NZmax-1) = sin((X(NXmax, NYmin:NYmax-1, NZmin:NZmax-1) + 0.5d0*dX) &
                                                         + Y(NXmax, NYmin:NYmax-1, NZmin:NZmax-1) &
                                                         + Z(NXmax, NYmin:NYmax-1, NZmin:NZmax-1))
-        Vx_p(NXmin:NXmax-1, NYmin-1, NZmin:NZmax-1) = sin((X(NXmin:NXmax-1, NYmin-1, NZmin:NZmax-1) + 0.5d0*dX) &
+        Vz_p(NXmin:NXmax-1, NYmin-1, NZmin:NZmax-1) = sin((X(NXmin:NXmax-1, NYmin-1, NZmin:NZmax-1) + 0.5d0*dX) &
                                                         + Y(NXmin:NXmax-1, NYmin-1, NZmin:NZmax-1) &
                                                         + Z(NXmin:NXmax-1, NYmin-1, NZmin:NZmax-1))
-        Vx_p(NXmin:NXmax-1, NYmax, NZmin:NZmax-1) = sin((X(NXmin:NXmax-1, NYmax, NZmin:NZmax-1) + 0.5d0*dX) &
+        Vz_p(NXmin:NXmax-1, NYmax, NZmin:NZmax-1) = sin((X(NXmin:NXmax-1, NYmax, NZmin:NZmax-1) + 0.5d0*dX) &
                                                         + Y(NXmin:NXmax-1, NYmax, NZmin:NZmax-1) &
                                                         + Z(NXmin:NXmax-1, NYmax, NZmin:NZmax-1))
-        Vx_p(NXmin:NXmax-1, NYmin:NYmax-1, NZmin-1) = sin((X(NXmin:NXmax-1, NYmin:NYmax-1, NZmin-1) + 0.5d0*dX) &
+        Vz_p(NXmin:NXmax-1, NYmin:NYmax-1, NZmin-1) = sin((X(NXmin:NXmax-1, NYmin:NYmax-1, NZmin-1) + 0.5d0*dX) &
                                                         + Y(NXmin:NXmax-1, NYmin:NYmax-1, NZmin-1) &
                                                         + Z(NXmin:NXmax-1, NYmin:NYmax-1, NZmin-1))
-        Vx_p(NXmin:NXmax-1, NYmin:NYmax-1, NZmax) = sin((X(NXmin:NXmax-1, NYmin:NYmax-1, NZmax) + 0.5d0*dX) &
+        Vz_p(NXmin:NXmax-1, NYmin:NYmax-1, NZmax) = sin((X(NXmin:NXmax-1, NYmin:NYmax-1, NZmax) + 0.5d0*dX) &
                                                         + Y(NXmin:NXmax-1, NYmin:NYmax-1, NZmax) &
                                                         + Z(NXmin:NXmax-1, NYmin:NYmax-1, NZmax))
-    end subroutine set_xpvel_bc
+    end subroutine set_zpvel_bc
 !********************************************************
 !   KN法において連立方程式の右辺を計算するサブルーチン  *
 !********************************************************
-subroutine cal_RHSx(Vx, Vy, Vz, p, Ax2, istep, RHSx, X, Y, Z)
+subroutine cal_RHSz(Vx, Vy, Vz, p, Az2, istep, RHSz, X, Y, Z)
     integer, intent(in) :: istep
     double precision, intent(in) :: X(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
     double precision, intent(in) :: Y(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
@@ -87,11 +87,11 @@ subroutine cal_RHSx(Vx, Vy, Vz, p, Ax2, istep, RHSx, X, Y, Z)
     double precision, intent(in) :: Vy(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
     double precision, intent(in) :: Vz(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
     double precision, intent(in) :: p(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-    double precision, intent(inout) :: Ax2(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
-    double precision, intent(out) :: RHSx(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
-    double precision Ax1(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
-    double precision Bx(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
-    double precision dpx(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
+    double precision, intent(inout) :: Az2(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+    double precision, intent(out) :: RHSz(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+    double precision Az1(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+    double precision Bz(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+    double precision dpz(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
     double precision C
     integer iX, iY, iZ
     !---計算用数値の計算---
@@ -99,27 +99,27 @@ subroutine cal_RHSx(Vx, Vy, Vz, p, Ax2, istep, RHSx, X, Y, Z)
     do iZ = NZmin, NZmax-1
         do iY = NYmin, NYmax-1
             do iX = NXmin, NXmax-1
-                RHSx(iX,iY,iZ) = (1.0d0 + 3.0d0*C)*sin((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ))
+                RHSz(iX,iY,iZ) = (1.0d0 + 3.0d0*C)*sin((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ))
             enddo
         enddo
     enddo
-end subroutine cal_RHSx
+end subroutine cal_RHSz
 !*******************************
 !   反復計算を行うサブルーチン *
 !*******************************
-    subroutine cal_itr_x(RHSx, Vx_p, X, Y, Z)
-        double precision, intent(in) :: RHSx(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+    subroutine cal_itr_z(RHSz, Vz_p, X, Y, Z)
+        double precision, intent(in) :: RHSz(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
         double precision, intent(in) :: X(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(in) :: Y(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(in) :: Z(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-        double precision, intent(out) :: Vx_p(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
+        double precision, intent(out) :: Vz_p(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
         double precision Er(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
         double precision C, C0, Cx, Cy, Cz, dC0     !計算用数値
         integer, parameter :: itrmax = 10000        !最大反復回数
         double precision, parameter :: eps = 1.0d-9 !誤差のしきい値
         double precision, parameter :: beta = 1.7d0 !過緩和係数
         integer itr, iX, iY, iZ, start
-        double precision error, norm_RHSx, norm_er
+        double precision error, norm_RHSz, norm_er
         !---計算用数値の計算---
         C = 0.5d0*dt/Re
         C0 = (1.0d0 + 2.0d0*C*(ddX2 + ddY2 + ddZ2))
@@ -128,34 +128,34 @@ end subroutine cal_RHSx
         Cy = C*ddY2
         Cz = C*ddZ2
         !---SOR法で連立方程式を解く---
-        Vx_p(:, :, :) = 0.0d0       !初期値の設定
+        Vz_p(:, :, :) = 0.0d0       !初期値の設定
         do itr = 1, itrmax
             !誤差の初期値の設定
             error = 0.0d0
-            norm_RHSx = 0.0d0
+            norm_RHSz = 0.0d0
             norm_er = 0.0d0
             !境界を除く領域で計算
             do iZ = NZmin, NZmax-1
                 do iY = NYmin, NYmax-1
                     do start = NXmin, NXmin+1
                         do iX = start, NXmax-1, 2
-                            Er(iX,iY,iZ) = RHSx(iX,iY,iZ) + Cx*(Vx_p(iX-1,iY,iZ) + Vx_p(iX+1,iY,iZ)) &
-                                        + Cy*(Vx_p(iX,iY-1,iZ) + Vx_p(iX,iY+1,iZ)) &
-                                        + Cz*(Vx_p(iX,iY,iZ-1) + Vx_p(iX,iY,iZ+1)) - C0*Vx_p(iX,iY,iZ)
+                            Er(iX,iY,iZ) = RHSz(iX,iY,iZ) + Cx*(Vz_p(iX-1,iY,iZ) + Vz_p(iX+1,iY,iZ)) &
+                                        + Cy*(Vz_p(iX,iY-1,iZ) + Vz_p(iX,iY+1,iZ)) &
+                                        + Cz*(Vz_p(iX,iY,iZ-1) + Vz_p(iX,iY,iZ+1)) - C0*Vz_p(iX,iY,iZ)
                             !---解の更新---
-                            Vx_p(iX,iY,iZ) = Vx_p(iX,iY,iZ) + beta*dC0*Er(iX,iY,iZ)
+                            Vz_p(iX,iY,iZ) = Vz_p(iX,iY,iZ) + beta*dC0*Er(iX,iY,iZ)
                             norm_er = norm_er + Er(iX,iY,iZ)**2
-                            norm_RHSx = norm_RHSx + RHSx(iX,iY,iZ)**2
+                            norm_RHSz = norm_RHSz + RHSz(iX,iY,iZ)**2
                         enddo
                     enddo
                 enddo
             enddo
             norm_er = sqrt(norm_er / dble(Ng))
-            norm_RHSx = sqrt(norm_RHSx / dble(Ng))
+            norm_RHSz = sqrt(norm_RHSz / dble(Ng))
             !誤差の計算
-            error = norm_er / norm_RHSx
+            error = norm_er / norm_RHSz
             !境界条件の設定
-            call set_xpvel_bc(Vx_p, X, Y, Z)
+            call set_zpvel_bc(Vz_p, X, Y, Z)
             !収束判定
             if(error < eps) then
                 write(*, *) 'converged.'
@@ -164,44 +164,44 @@ end subroutine cal_RHSx
                 write(*, *) error
             endif
         enddo
-    end subroutine cal_itr_x
+    end subroutine cal_itr_z
     !*********************************************
-    !   x方向の予測速度を求めるサブルーチン(KN)  *
+    !   z方向の予測速度を求めるサブルーチン(KN)  *
     !*********************************************
-    subroutine prediction_x_kn(Vx, Vy, Vz, p, Ax2, Vx_p, istep, X, Y, Z)
+    subroutine prediction_z_kn(Vx, Vy, Vz, p, Az2, Vz_p, istep, X, Y, Z)
         integer, intent(in) :: istep
         double precision, intent(in) :: Vx(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
         double precision, intent(in) :: Vy(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
         double precision, intent(in) :: Vz(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
         double precision, intent(in) :: p(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-        double precision, intent(inout) :: Ax2(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+        double precision, intent(inout) :: Az2(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
         double precision, intent(in) :: X(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(in) :: Y(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(in) :: Z(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-        double precision, intent(out) :: Vx_p(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
-        double precision RHSx(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+        double precision, intent(out) :: Vz_p(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
+        double precision RHSz(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
         !---連立方程式の右辺の計算---
-        call cal_RHSx(Vx, Vy, Vz, p, Ax2, istep, RHSx, X, Y, Z)
+        call cal_RHSz(Vx, Vy, Vz, p, Az2, istep, RHSz, X, Y, Z)
         !---反復計算---
-        call cal_itr_x(RHSx, Vx_p, X, Y, Z)
-    end subroutine prediction_x_kn
+        call cal_itr_z(RHSz, Vz_p, X, Y, Z)
+    end subroutine prediction_z_kn
 !************************************
 !   解析解を計算するサブルーチン    *
 !************************************
-    subroutine cal_Vx_th(X, Y, Z, Vx_p_th)
+    subroutine cal_Vz_th(X, Y, Z, Vz_p_th)
         double precision, intent(in) :: X(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(in) :: Y(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
         double precision, intent(in) :: Z(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-        double precision, intent(out) :: Vx_p_th(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+        double precision, intent(out) :: Vz_p_th(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
         integer iX, iY, iZ
         do iZ = NZmin, NZmax-1
             do iY = NYmin, NYmax-1
                 do iX = NXmin, NXmax-1
-                    Vx_p_th(iX,iY,iZ) = sin((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ))
+                    Vz_p_th(iX,iY,iZ) = sin((X(iX,iY,iZ) + 0.5d0*dX) + Y(iX,iY,iZ) + Z(iX,iY,iZ))
                 enddo
             enddo
         enddo
-    end subroutine cal_Vx_th
+    end subroutine cal_Vz_th
 !********************************
 !   誤差を計算するサブルーチン  *
 !********************************
@@ -222,10 +222,10 @@ end subroutine cal_RHSx
         enddo
         error = sqrt(error_norm / dble(Ng))
     end subroutine cal_error
-end module prediction_x_test
+end module prediction_z_test
 
 program main
-use prediction_x_test
+use prediction_z_test
 implicit none
 integer istep
 double precision X(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
@@ -235,16 +235,16 @@ double precision Vx(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
 double precision Vy(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
 double precision Vz(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
 double precision p(NXmin-1:NXmax+1, NYmin-1:NYmax+1, NZmin-1:NZmax+1)
-double precision Ax2(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
-double precision Vx_p(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
-double precision Vx_p_th(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+double precision Az2(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
+double precision Vz_p(NXmin-1:NXmax, NYmin-1:NYmax, NZmin-1:NZmax)
+double precision Vz_p_th(NXmin:NXmax-1, NYmin:NYmax-1, NZmin:NZmax-1)
 double precision error
 istep = 1
 call set_grid(X, Y, Z)
-call prediction_x_kn(Vx, Vy, Vz, p, Ax2, Vx_p, istep, X, Y, Z)
-call cal_Vx_th(X, Y, Z, Vx_p_th)
-call cal_error(Vx_p, Vx_p_th, error)
-open(11, file = 'chk_timestepx_precision.dat', position = 'append')
+call prediction_z_kn(Vx, Vy, Vz, p, Az2, Vz_p, istep, X, Y, Z)
+call cal_Vz_th(X, Y, Z, Vz_p_th)
+call cal_error(Vz_p, Vz_p_th, error)
+open(11, file = 'chk_timestepz_precision.dat', position = 'append')
 write(11, *) dt, error
 close(11)
 end program main
